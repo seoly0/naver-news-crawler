@@ -1,5 +1,6 @@
 import requests
 import re
+import math
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from datetime import datetime, timedelta
@@ -34,7 +35,7 @@ def get_date(text: str):
         return str((datetime.now() - timedelta(days=days_ago)).date())
 
 
-def crawl(query: str):
+def crawl(query: str, n: int = 100):
     print(f'"{query}"에 대해 검색...')
 
     keyword = quote(query)
@@ -43,12 +44,14 @@ def crawl(query: str):
     next_url = response['nextUrl']
     contents = response['contents']
 
-    for i in range(1, 10):
+    to = math.ceil(n / 10)
+
+    for i in range(1, to):
         response = requests.get(next_url).json()
         next_url = response['nextUrl']
         contents = contents + response['contents']
 
-    ret = []
+    data = []
 
     for content in contents:
         node = BeautifulSoup(content, 'html.parser')
@@ -60,12 +63,19 @@ def crawl(query: str):
         date = list(filter(lambda x: x is not None, map(lambda x: get_date(x.text), info_node.find_all('span', class_='info'))))
         date = date[0] if date else None
 
-        ret.append({
+        data.append({
             'author': author,
             'title': title,
             'url': url,
             'date': date
         })
+
+    ret = {
+        'keyword': query,
+        'timestamp': datetime.now().timestamp(),
+        'data': data[:n],
+        'length': n,
+    }
 
     return ret
 
