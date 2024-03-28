@@ -1,4 +1,4 @@
-from nnc.func import crawl
+from .func import crawl
 import json
 import sys
 from datetime import datetime
