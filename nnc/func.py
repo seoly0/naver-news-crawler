@@ -35,7 +35,8 @@ def get_date(text: str):
         return str((datetime.now() - timedelta(days=days_ago)).date())
 
 
-def crawl(query: str, n: int = 100):
+def crawl(query: str, n: int = 100, excludes=[]):
+
     print(f'"{query}"에 대해 검색...')
 
     keyword = quote(query)
@@ -63,18 +64,28 @@ def crawl(query: str, n: int = 100):
         date = list(filter(lambda x: x is not None, map(lambda x: get_date(x.text), info_node.find_all('span', class_='info'))))
         date = date[0] if date else None
 
-        data.append({
-            'author': author,
-            'title': title,
-            'url': url,
-            'date': date
-        })
+        valid = True
+        for exclude in excludes:
+            if exclude in title:
+                valid = False
+
+        if valid:
+            data.append({
+                'author': author,
+                'title': title,
+                'url': url,
+                'date': date
+            })
+
+    data = data[:n]
 
     ret = {
-        'keyword': query,
+        'query': query,
+        'excludes': excludes,
+        'requestedLength': n,
         'timestamp': datetime.now().timestamp(),
-        'data': data[:n],
-        'length': n,
+        'data': data,
+        'length': len(data),
     }
 
     return ret

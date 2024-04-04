@@ -11,12 +11,15 @@ if __name__ == '__main__':
 
     parser.add_argument('-n', type=int)
     parser.add_argument('-d', type=str)
+    parser.add_argument('-e', type=str)
     parser.add_argument('params', nargs='*')
 
     args = parser.parse_args()
 
     n = args.n if args.n else 100
     d = args.d if args.d else ''
+    e = args.e.split(',') if args.e else ''
+
     keywords = args.params if args.params else []
 
     if len(keywords) < 1:
@@ -26,7 +29,7 @@ if __name__ == '__main__':
     keyword_combined = '+'.join(keywords)
 
     try:
-        result = crawl(keyword_combined, n)
+        result = crawl(keyword_combined, n, e)
     except Exception as e:
         print(e)
         print('Crawling Fail...')
